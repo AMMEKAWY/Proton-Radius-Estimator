@@ -1,7 +1,7 @@
 import subprocess
 import numpy as np
 
-num_runs = 50
+num_runs = 100
 mean_results = np.zeros(num_runs)
 
 for i in range(num_runs):
