@@ -95,7 +95,7 @@ def plot_motion(positions):
 
 # Set parameters for an electron and a hydrogen atom
 h_bar = 1.04e-34
-energy = 5e6
+energy = 2e7
 electron_charge = -1.602e-19  # Charge of the electron in C
 electron_mass = 9.109e-31  # Mass of the electron in kg
 mean_momentum = np.sqrt(2 * electron_mass * energy * abs(electron_charge))  # Mean momentum in kg m/s
@@ -163,5 +163,4 @@ bin_width = 0.1
 # Calculate and plot the histogram and differential cross section
 bin_centers, differential_cross_section = calculate_differential_cross_section(scattering_angles, bin_width)
 plot_histogram_and_cross_section(bin_centers, differential_cross_section)
-
 
