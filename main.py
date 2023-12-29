@@ -38,6 +38,6 @@ print("Actual proton radius=", true_proton_radius)
 
 # Calculate the Relative error
 re = abs(overall_mean_radius-true_proton_radius)/true_proton_radius
-print(f"\nThe mean proton radius over {num_runs} runs = {overall_mean_radius} fm +/-",re)
+print(f"\nThe calculated proton radius over {num_runs} runs = {overall_mean_radius} fm +/-",re)
 # Print the error results
 print("Relative error =", re)
