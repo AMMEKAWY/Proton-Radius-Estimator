@@ -2,7 +2,7 @@ import subprocess
 import numpy as np
 
 num_runs = 10
-mean_results = []
+mean_results = np.zeros(num_runs)
 
 for i in range(num_runs):
     # Run the sps.py script using subprocess
@@ -11,9 +11,7 @@ for i in range(num_runs):
 
     # Check if the process completed successfully
     if process.returncode == 0:
-
         # Extract the proton radius from the output (modify this based on the actual output format)
-        
         lines = output.splitlines()
         for line in lines:
             if "Proton radius of run" in line:
@@ -23,28 +21,22 @@ for i in range(num_runs):
                 except ValueError:
                     print(f"Error: Invalid value for proton radius in output for run {i + 1}")
 
-            mean_results.append(float(output) * 1e15)
+        # Assign the proton radius to the corresponding position in the mean_results array
+        mean_results[i] = round(float(output) * 1e15, 2)
 
-            # Print the proton radius for the current run
-            print(f"Proton radius of run {i + 1} = {float(output) * 1e15}")
+        # Print the proton radius for the current run
+        print(f"Proton radius of run {i + 1} = {mean_results[i]} fm")
 
-
-overall_mean_radius = np.mean(mean_results)
+overall_mean_radius = round(np.mean(mean_results), 2)
+uncert=abs(min(mean_results)-max(mean_results))/2
 # Print the mean proton radius
-print(f"\nThe mean proton radius over {num_runs} runs = {overall_mean_radius}")
+print(f"\nThe mean proton radius over {num_runs} runs = {overall_mean_radius} fm +/-",round(uncert, 2))
 
 # Assume you have the true value for the proton radius
 true_proton_radius = 0.84  # Replace with the actual true value
-
-# Calculate the absolute error
-absolute_error = abs(overall_mean_radius - true_proton_radius)
-
-# Calculate the relative error as a percentage
-relative_error_percentage = (absolute_error / true_proton_radius) * 100
+print("Actual proton radius=", true_proton_radius)
+# Calculate the Root Mean Squared Error (RMSE)
+rmse = np.sqrt(np.nansum((mean_results - true_proton_radius)**2) / np.size(mean_results))
 
 # Print the error results
-print(f"Measured Proton Radius: {overall_mean_radius}")
-print(f"True Proton Radius: {true_proton_radius}")
-print(f"Absolute Error: {absolute_error}")
-print(f"Relative Error (%): {relative_error_percentage}")
-
+print("RMSE =", rmse)
