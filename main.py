@@ -1,7 +1,7 @@
 import subprocess
 import numpy as np
 
-num_runs = 100
+num_runs = 10
 mean_results = np.zeros(num_runs)
 
 for i in range(num_runs):
@@ -29,15 +29,18 @@ for i in range(num_runs):
 
 overall_mean_radius = round(np.mean(mean_results), 2)
 
-# Print the mean proton radius
+# Calculate the Standard Deviation
+std_dev = np.std(mean_results, ddof=1)
 
+# Print the mean proton radius and standard deviation
+print(f"\nMean proton radius over {num_runs} runs = {overall_mean_radius} fm +/- {round(std_dev,2)} fm (1 SD)")
 
 # Assume you have the true value for the proton radius
 true_proton_radius = 0.84  # Replace with the actual true value
-print("Actual proton radius=", true_proton_radius)
+print("Actual proton radius =", true_proton_radius)
 
 # Calculate the Relative error
-re = abs(overall_mean_radius-true_proton_radius)/true_proton_radius
-print(f"\nThe calculated proton radius over {num_runs} runs = {overall_mean_radius} fm +/-",re)
+re = abs(overall_mean_radius - true_proton_radius) / true_proton_radius
+print(f"\nCalculated proton radius over {num_runs} runs = {overall_mean_radius} fm")
 # Print the error results
-print("Relative error =", re)
+print("Relative error =", round(re,2))
