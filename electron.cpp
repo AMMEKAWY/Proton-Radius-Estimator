@@ -6,16 +6,23 @@
 #include <unordered_map>
 #include <algorithm>
 
-int n=500000;
-
+int n=5000;
+double multfactor=500;
+double energy=100000;
 // Constants
 const double q_e = -1.602176634e-19;   // Elementary charge (C)
 const double epsilon_0 = 8.854187817e-12;  // Vacuum permittivity (F/m)
 const double m_e = 9.10938356e-31;      // Electron mass (kg)
 const double h_bar = 1.054571817e-34;   // Reduced Planck constant (Js)
+const double a0=5e-11;
 std::vector<double> angle;
-//const std::string filename = "deflection_angles.txt";
-//std::ofstream file(filename, std::ios::app);
+std::vector<double> pdf;
+std::vector<double> be;
+const std::string filename = "H_50.txt";
+std::ofstream file(filename);
+
+double k=sqrt(2*energy*std::abs(q_e)*m_e)/h_bar;
+double conv=1/(k*k);        
 
 // Function to calculate Coulomb force in x and y directions
 void coulombForce(double q1, double q2, double x, double y, double z, double& fx, double& fy, double& fz) {
@@ -108,7 +115,7 @@ void simulate(double mean_position, double delta_y, double mean_momentum, double
     
     double angle_value= std::atan2(dy, dx);
     
-    if(angle_value<0){ angle_value = (angle_value)+2*M_PI;}
+    if(angle_value<0){ angle_value = (angle_value);}
     
     angle.push_back(angle_value);
     //std::cout<<angle<<std::endl;
@@ -143,30 +150,61 @@ void createHistogram(const std::vector<double>& data, int numBins) {
 
         // Display asterisks based on the count
         file2 << (binStart+binEnd)/2 <<" "<< kappa << std::endl;
+        pdf.push_back(kappa);
+        be.push_back(binEnd);
         //std::cout << (binStart+binEnd)/2 <<" "<< kappa << std::endl;
     }
     
     file2.close();
 }
 
+double estimateCrossSection(const std::vector<double>& probabilityDensity, const std::vector<double>& binEdges) {
+    double totalCrossSection = 0.0;
+    double binWidth, binMidpoint, differentialCrossSection;
+
+    //filename=
+    // Loop over probability density vector
+    for (size_t i = 0; i < probabilityDensity.size(); ++i) {
+        // Calculate bin width
+        binWidth = binEdges[i + 1] - binEdges[i];
+
+        // Calculate bin midpoint
+        binMidpoint = (binEdges[i] + binEdges[i + 1]) / 2.0;
+
+        // Estimate differential cross-section
+        differentialCrossSection = probabilityDensity[i] / binWidth;
+
+        // Accumulate to total cross-section
+        totalCrossSection += differentialCrossSection*sin(binMidpoint);
+
+        // Optionally, you can print or store the results for each bin
+        //std::cout << "Bin " << i << ": Cross-Section = " << differentialCrossSection/(2*M_PI) << " (midpoint = " << binMidpoint << ")\n";
+        //file<<binMidpoint<<" "<<differentialCrossSection<<std::endl;
+    }
+    
+    std::cout << "totalCrossSection at energy("<<energy<<"eV)= "<<totalCrossSection*conv/a0/a0*2*M_PI << std::endl;
+
+    return totalCrossSection;
+}
 
 int main() {
 
-    
-
     // Parameters based on specified formulas
-    double mean_energy = 50 * std::abs(q_e);
+    double mean_energy = energy * std::abs(q_e);
     double mean_momentum = std::sqrt(2 * m_e * mean_energy);
+    double velocity=mean_momentum/m_e;
+
     double mean_position = 5.29e-11;
     
     std::random_device rd;
     std::default_random_engine generator(rd());
 
-    std::uniform_real_distribution<double> y_distribution(-mean_position, mean_position);
+    std::uniform_real_distribution<double> y_distribution(-multfactor*mean_position, multfactor*mean_position);
 
     double delta_y = h_bar / (2 * std::abs(mean_momentum / std::sqrt(12)));
-    double dt = 1.0e-17;  // Time step (s)
+    double dt = 1e-11/velocity;  // Time step (s)
     double t_max = 1.0e-13;  // Maximum simulation time (s)
+    std::cout<<conv<<std::endl;
     
     for(int i=0; i<n; i++){
     
@@ -184,11 +222,11 @@ int main() {
     }
     
     std::cout<<"			"<<std::endl;
-    //file.close();
     std::cout<<"creating Histogram"<<std::endl;
     createHistogram(angle, 180);
 
-    
+    estimateCrossSection(pdf, be);
+    file.close();
     std::cout<<"done!"<<std::endl;
 
     return 0;
